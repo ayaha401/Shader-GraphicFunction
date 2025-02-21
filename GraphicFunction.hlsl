@@ -23,4 +23,15 @@ half3 radialBlur(sampler2D tex, float2 uv, float blurWidth, int sampleCount = 10
     return resultColor;
 }
 
+// MatCapを表現する
+// 画面端で歪まないように補正されている
+// https://qiita.com/marv_kurushimay/items/7d49e503f69ba74df427
+// blend_RNMを使用しているためMathFunction.hlslを先に読み込む必要がある
+half3 matCap(sampler2D tex, float3 cameraViewCS, float3 normalCS)
+{
+    float3 matCapViewCS = cameraViewCS * float3(-1, -1, 1);
+    float2 matCapUV = blend_RNM(matCapViewCS, normalCS).xy * .5 + .5;
+    return tex2D(tex, matCapUV);
+}
+
 #endif
