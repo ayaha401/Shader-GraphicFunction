@@ -34,4 +34,18 @@ half3 matCap(sampler2D tex, float3 cameraViewCS, float3 normalCS)
     return tex2D(tex, matCapUV);
 }
 
+// BRPのUnpackNormalWithScaleがURPにはないので自分で用意する
+float3 UnpackNormalWithScale(float4 packednormal, float scale)
+{
+	#ifndef UNITY_NO_DXT5nm
+	// Unpack normal as DXT5nm (1, y, 1, x) or BC5 (x, y, 0, 1)
+	// Note neutral texture like "bump" is (0, 0, 1, 1) to work with both plain RGB normal and DXT5nm/BC5
+	packednormal.x *= packednormal.w;
+	#endif
+	float3 normal;
+	normal.xy = (packednormal.xy * 2 - 1) * scale;
+	normal.z = sqrt(1 - saturate(dot(normal.xy, normal.xy)));
+	return normal;
+}
+
 #endif
